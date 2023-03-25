@@ -30,6 +30,13 @@ class Entity(object):
 
     def get_data(self):
         response = requests.get(self.url, headers={"User-Agent": self.USER})
+
+        if response.status_code == 404:
+            raise ValueError(f'Invalid url: {self.url}')
+
+        if response.status_code == 403:
+            raise ValueError(f'Permission denied: Introduce correct headers: {self.HEADER}')
+
         return json.loads(s=response.content.decode())
 
     def run(self):
