@@ -23,6 +23,45 @@ class Base(object):
         return '<%s(%s)>' % (self.__class__.__name__, ', '.join(attributes))
 
 
+class Filing(Base):
+    __repr_fields__ = ('url',)
+
+    def __init__(self, url, cik, cik_directory):
+        self.url = url
+        self.cik = cik
+        self.cik_directory = cik_directory
+
+        self.filename = self.get_directory_filename(absolute_path=url)
+        self.filepath = os.path.join(self.cik_directory, self.filename)
+
+        self.data = None
+
+    @staticmethod
+    def get_directory_filename(absolute_path):
+        file_name = os.path.basename(absolute_path)
+        directory_name = os.path.basename(os.path.dirname(absolute_path))
+        return f'{directory_name}-{file_name}'
+
+    def get_data(self):
+        response = requests.get(self.url, headers={"User-Agent": self.USER})
+
+        if response.status_code == 404:
+            raise ValueError(f'Invalid url: {self.url}')
+
+        if response.status_code == 403:
+            raise ValueError(f'Permission denied: Introduce correct headers: {self.HEADER}')
+
+        return response.content.decode()
+
+    def dump(self):
+        with open(self.filepath, 'w+') as file:
+            file.write(self.data)
+
+    def run(self):
+        self.data = self.get_data()
+        self.dump()
+
+
 class Entity(Base):
     __repr_fields__ = ('url', 'cik',)
 
