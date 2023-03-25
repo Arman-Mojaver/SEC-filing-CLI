@@ -6,16 +6,52 @@ from more_itertools import chunked
 from classes import CIKLoader, Entity
 
 
+FORM_TYPES = [
+    '10-K',
+    '10-Q',
+    '25',
+    '25-NSE',
+    '3',
+    '3/A',
+    '4',
+    '4/A',
+    '424B2',
+    '8-A12B',
+    '8-K',
+    '8-K/A',
+    'CERT',
+    'CERTNYS',
+    'CORRESP',
+    'DEF 14A',
+    'DEFA14A',
+    'DFAN14A',
+    'FWP',
+    'IRANNOTICE',
+    'NO ACT',
+    'PRE 14A',
+    'PX14A6G',
+    'PX14A6N',
+    'S-3ASR',
+    'S-8',
+    'S-8 POS',
+    'SC 13G',
+    'SC 13G/A',
+    'SD',
+    'UPLOAD',
+]
+
+
 @click.command()
 @click.argument('ciks', type=str, nargs=-1)
-def main(ciks):
+@click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
+def main(ciks, form):
     if not ciks:
         ciks = CIKLoader().load()
 
     if not ciks:
         raise click.ClickException('Introduce a cik number or add a ciks.json file to the running directory')
 
-    entities = [Entity(cik=cik) for cik in ciks]
+    entities = [Entity(cik=cik, form=form) for cik in ciks]
 
     for entity in entities:
         entity.run()

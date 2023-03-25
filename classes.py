@@ -65,10 +65,10 @@ class Filing(Base):
 class Entity(Base):
     __repr_fields__ = ('url', 'cik',)
 
-    TEN_K_KEY = '10-K'
-
-    def __init__(self, cik):
+    def __init__(self, cik, form):
         self.cik = self.process_cik(cik=cik)
+        self.form = form
+
         self.url = f'https://data.sec.gov/submissions/CIK{self.cik}.json'
         self.cik_directory = os.path.join(self.DATA_DIRECTORY, self.cik)
 
@@ -136,7 +136,7 @@ class Entity(Base):
             for form, accession_number, primary_document in zip(
                 filings['form'], filings['accessionNumber'], filings['primaryDocument']
             )
-            if form == self.TEN_K_KEY
+            if form == self.form
         ]
 
     def get_filings(self):
