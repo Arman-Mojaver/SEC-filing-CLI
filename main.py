@@ -10,6 +10,8 @@ class Entity(object):
     DATA_DIRECTORY_NAME = 'Data'
     DATA_DIRECTORY = os.path.join(os.getcwd(), DATA_DIRECTORY_NAME)
 
+    TEN_K_KEY = '10-K'
+
     def __init__(self, cik):
         self.cik = self.process_cik(cik=cik)
         self.url = f'https://data.sec.gov/submissions/CIK{self.cik}.json'
@@ -19,6 +21,7 @@ class Entity(object):
         self.create_cik_directory()
 
         self.metadata = None
+        self.filing_urls = None
 
     @staticmethod
     def process_cik(cik):
@@ -59,8 +62,30 @@ class Entity(object):
 
         return json.loads(s=response.content.decode())
 
+    def get_filing_urls(self):
+        filings = self.metadata.get('filings').get('recent')
+
+        if not filings:
+            raise ValueError(f'Filings not found in response')
+
+        list_length = len(filings.get('form'))
+        for list_ in filings.values():
+            if len(list_) != list_length:
+                raise ValueError(
+                    f'There is a mismatch in the metadata structure of the filing. {len(list_)} != {list_length}'
+                )
+
+        return [
+            f'https://www.sec.gov/Archives/edgar/data/{self.cik}/{accession_number.replace("-", "")}/{primary_document}'
+            for form, accession_number, primary_document in zip(
+                filings['form'], filings['accessionNumber'], filings['primaryDocument']
+            )
+            if form == self.TEN_K_KEY
+        ]
+
     def run(self):
         self.metadata = self.get_metadata()
+        self.filing_urls = self.get_filing_urls()
 
 
 class CIKLoader(object):
