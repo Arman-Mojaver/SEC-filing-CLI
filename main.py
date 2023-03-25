@@ -3,12 +3,28 @@ import requests
 import json
 
 
-class Entity(object):
+class Base(object):
     USER = "arman@mojaver.com"
     HEADER = {"User-Agent": USER}
 
     DATA_DIRECTORY_NAME = 'Data'
-    DATA_DIRECTORY = os.path.join(os.getcwd(), DATA_DIRECTORY_NAME)
+    CIKS_FILE_NAME = 'ciks.json'
+
+    CWD = os.getcwd()
+    DATA_DIRECTORY = os.path.join(CWD, DATA_DIRECTORY_NAME)
+    CIKS_PATH = os.path.join(CWD, CIKS_FILE_NAME)
+
+    def __repr__(self) -> str:
+        fields = getattr(self, '__repr_fields__', tuple())
+
+        attributes = []
+        for key in fields:
+            attributes.append('%s=%r' % (key, getattr(self, key, None)))
+        return '<%s(%s)>' % (self.__class__.__name__, ', '.join(attributes))
+
+
+class Entity(Base):
+    __repr_fields__ = ('url', 'cik',)
 
     TEN_K_KEY = '10-K'
 
@@ -88,10 +104,7 @@ class Entity(object):
         self.filing_urls = self.get_filing_urls()
 
 
-class CIKLoader(object):
-    CIKS_FILE_NAME = 'ciks.json'
-    CIKS_PATH = os.path.join(os.getcwd(), CIKS_FILE_NAME)
-
+class CIKLoader(Base):
     def __init__(self):
         pass
 
