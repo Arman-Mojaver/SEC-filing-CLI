@@ -18,7 +18,7 @@ class Entity(object):
         self.create_data_directory()
         self.create_cik_directory()
 
-        self.data = None
+        self.metadata = None
 
     @staticmethod
     def process_cik(cik):
@@ -48,7 +48,7 @@ class Entity(object):
 
         os.mkdir(self.cik_directory)
 
-    def get_data(self):
+    def get_metadata(self):
         response = requests.get(self.url, headers={"User-Agent": self.USER})
 
         if response.status_code == 404:
@@ -60,9 +60,9 @@ class Entity(object):
         return json.loads(s=response.content.decode())
 
     def run(self):
-        self.data = self.get_data()
+        self.metadata = self.get_metadata()
 
 
 entity = Entity(cik='320193')
 entity.run()
-print(entity.data)
+print(entity.metadata)
