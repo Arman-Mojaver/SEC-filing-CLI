@@ -1,6 +1,9 @@
 import os
+import time
 import requests
 import json
+
+from more_itertools import chunked
 
 
 class Base(object):
@@ -158,7 +161,15 @@ class CIKLoader(Base):
 
 
 ciks = CIKLoader().load()
+entities = [Entity(cik=cik) for cik in ciks]
 
-for cik in ciks:
-    entity = Entity(cik=cik)
+for entity in entities:
     entity.run()
+
+all_filings = [filing for entity in entities for filing in entity.filings]
+chunked_filings = chunked(all_filings, n=10)
+
+for chunk in chunked_filings:
+    for filing in chunk:
+        filing.run()
+    time.sleep(1)
