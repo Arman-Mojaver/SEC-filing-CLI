@@ -4,8 +4,7 @@ import json
 
 
 class Base(object):
-    USER = "arman@mojaver.com"
-    HEADER = {"User-Agent": USER}
+    HEADER = {"User-Agent": "user@domain.com"}
 
     DATA_DIRECTORY_NAME = 'Data'
     CIKS_FILE_NAME = 'ciks.json'
@@ -26,10 +25,11 @@ class Base(object):
 class Filing(Base):
     __repr_fields__ = ('url',)
 
-    def __init__(self, url, cik, cik_directory):
+    def __init__(self, url, cik, cik_directory, user=None):
         self.url = url
         self.cik = cik
         self.cik_directory = cik_directory
+        self.header = {"User-Agent": user} if user else self.HEADER
 
         self.filename = self.get_directory_filename(absolute_path=url)
         self.filepath = os.path.join(self.cik_directory, self.filename)
@@ -43,13 +43,13 @@ class Filing(Base):
         return f'{directory_name}-{file_name}'
 
     def get_data(self):
-        response = requests.get(self.url, headers={"User-Agent": self.USER})
+        response = requests.get(self.url, headers=self.header)
 
         if response.status_code == 404:
             raise ValueError(f'Invalid url: {self.url}')
 
         if response.status_code == 403:
-            raise ValueError(f'Permission denied: Introduce correct headers: {self.HEADER}')
+            raise ValueError(f'Permission denied: Introduce correct headers: {self.header}')
 
         return response.content.decode()
 
@@ -65,9 +65,10 @@ class Filing(Base):
 class Entity(Base):
     __repr_fields__ = ('url', 'cik',)
 
-    def __init__(self, cik, form):
+    def __init__(self, cik, form, user=None):
         self.cik = self.process_cik(cik=cik)
         self.form = form
+        self.header = {"User-Agent": user} if user else self.HEADER
 
         self.url = f'https://data.sec.gov/submissions/CIK{self.cik}.json'
         self.cik_directory = os.path.join(self.DATA_DIRECTORY, self.cik)
@@ -108,13 +109,13 @@ class Entity(Base):
         os.mkdir(self.cik_directory)
 
     def get_metadata(self):
-        response = requests.get(self.url, headers={"User-Agent": self.USER})
+        response = requests.get(self.url, headers=self.header)
 
         if response.status_code == 404:
             raise ValueError(f'Invalid url: {self.url}')
 
         if response.status_code == 403:
-            raise ValueError(f'Permission denied: Introduce correct headers: {self.HEADER}')
+            raise ValueError(f'Permission denied: Introduce correct headers: {self.header}')
 
         return json.loads(s=response.content.decode())
 

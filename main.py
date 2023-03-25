@@ -3,8 +3,7 @@ import click
 
 from more_itertools import chunked
 
-from classes import CIKLoader, Entity
-
+from classes import CIKLoader, Entity, Base
 
 FORM_TYPES = [
     '10-K',
@@ -42,16 +41,17 @@ FORM_TYPES = [
 
 
 @click.command()
-@click.argument('ciks', type=str, nargs=-1)
+@click.argument('ciks', type=str, nargs=-1, required=False)
 @click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
-def main(ciks, form):
+@click.option('-u', '--user', type=str, default=None)
+def main(ciks, form, user):
     if not ciks:
         ciks = CIKLoader().load()
 
     if not ciks:
         raise click.ClickException('Introduce a cik number or add a ciks.json file to the running directory')
 
-    entities = [Entity(cik=cik, form=form) for cik in ciks]
+    entities = [Entity(cik=cik, form=form, user=user) for cik in ciks]
 
     for entity in entities:
         entity.run()
@@ -59,8 +59,13 @@ def main(ciks, form):
     all_filings = [filing for entity in entities for filing in entity.filings]
     chunked_filings = list(chunked(all_filings, n=10))
 
+    if user:
+        click.echo(f'Running requests from user {user}:')
+    else:
+        click.echo(f'Running requests from user {Base.HEADER["User-Agent"]}: ')
+
     for index, chunk in enumerate(chunked_filings, 1):
-        click.echo(f'Running request batch {index}/{len(chunked_filings)}')
+        click.echo(f'\tRunning request batch {index}/{len(chunked_filings)}')
         for filing in chunk:
             filing.run()
         time.sleep(1)
