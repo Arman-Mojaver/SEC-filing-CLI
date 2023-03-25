@@ -153,5 +153,8 @@ class CIKLoader(Base):
         pass
 
     def load(self):
+        if not os.path.isfile(self.CIKS_PATH):
+            return
+
         with open(self.CIKS_PATH, 'r') as fp:
             return json.load(fp)

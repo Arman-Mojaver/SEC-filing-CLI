@@ -7,8 +7,13 @@ from classes import CIKLoader, Entity
 
 
 @click.command()
-def main():
-    ciks = CIKLoader().load()
+@click.argument('ciks', type=str, nargs=-1)
+def main(ciks):
+    if not ciks:
+        ciks = CIKLoader().load()
+
+    if not ciks:
+        raise click.ClickException('Introduce a cik number or add a ciks.json file to the running directory')
 
     entities = [Entity(cik=cik) for cik in ciks]
 
