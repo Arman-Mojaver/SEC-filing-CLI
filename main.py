@@ -63,6 +63,20 @@ class Entity(object):
         self.metadata = self.get_metadata()
 
 
-entity = Entity(cik='320193')
-entity.run()
-print(entity.metadata)
+class CIKLoader(object):
+    CIKS_FILE_NAME = 'ciks.json'
+    CIKS_PATH = os.path.join(os.getcwd(), CIKS_FILE_NAME)
+
+    def __init__(self):
+        pass
+
+    def load(self):
+        with open(self.CIKS_PATH, 'r') as fp:
+            return json.load(fp)
+
+
+ciks = CIKLoader().load()
+
+for cik in ciks:
+    entity = Entity(cik=cik)
+    entity.run()
