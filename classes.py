@@ -4,7 +4,7 @@ import json
 
 
 class Base(object):
-    HEADER = {"User-Agent": "user@domain.com"}
+    HEADERS = {"User-Agent": "user@domain.com"}
 
     DATA_DIRECTORY_NAME = 'Data'
     CIKS_FILE_NAME = 'ciks.json'
@@ -12,6 +12,18 @@ class Base(object):
     CWD = os.getcwd()
     DATA_DIRECTORY = os.path.join(CWD, DATA_DIRECTORY_NAME)
     CIKS_PATH = os.path.join(CWD, CIKS_FILE_NAME)
+
+    @staticmethod
+    def run_request(url, headers):
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 404:
+            raise ValueError(f'Invalid url: {url}')
+
+        if response.status_code == 403:
+            raise ValueError(f'Permission denied: Introduce correct headers: {headers}')
+
+        return response.content.decode()
 
     def __repr__(self) -> str:
         fields = getattr(self, '__repr_fields__', tuple())
@@ -29,7 +41,7 @@ class Filing(Base):
         self.url = url
         self.cik = cik
         self.cik_directory = cik_directory
-        self.header = {"User-Agent": user} if user else self.HEADER
+        self.headers = {"User-Agent": user} if user else self.HEADERS
 
         self.filename = self.get_directory_filename(absolute_path=url)
         self.filepath = os.path.join(self.cik_directory, self.filename)
@@ -42,23 +54,12 @@ class Filing(Base):
         directory_name = os.path.basename(os.path.dirname(absolute_path))
         return f'{directory_name}-{file_name}'
 
-    def get_data(self):
-        response = requests.get(self.url, headers=self.header)
-
-        if response.status_code == 404:
-            raise ValueError(f'Invalid url: {self.url}')
-
-        if response.status_code == 403:
-            raise ValueError(f'Permission denied: Introduce correct headers: {self.header}')
-
-        return response.content.decode()
-
     def dump(self):
         with open(self.filepath, 'w+') as file:
             file.write(self.data)
 
     def run(self):
-        self.data = self.get_data()
+        self.data = self.run_request(url=self.url, headers=self.headers)
         self.dump()
 
 
@@ -68,7 +69,7 @@ class Entity(Base):
     def __init__(self, cik, form, user=None):
         self.cik = self.process_cik(cik=cik)
         self.form = form
-        self.header = {"User-Agent": user} if user else self.HEADER
+        self.headers = {"User-Agent": user} if user else self.HEADERS
 
         self.url = f'https://data.sec.gov/submissions/CIK{self.cik}.json'
         self.cik_directory = os.path.join(self.DATA_DIRECTORY, self.cik)
@@ -108,17 +109,6 @@ class Entity(Base):
 
         os.mkdir(self.cik_directory)
 
-    def get_metadata(self):
-        response = requests.get(self.url, headers=self.header)
-
-        if response.status_code == 404:
-            raise ValueError(f'Invalid url: {self.url}')
-
-        if response.status_code == 403:
-            raise ValueError(f'Permission denied: Introduce correct headers: {self.header}')
-
-        return json.loads(s=response.content.decode())
-
     def get_filing_urls(self):
         filings = self.metadata.get('filings').get('recent')
 
@@ -144,7 +134,7 @@ class Entity(Base):
         return [Filing(url=url, cik=self.cik, cik_directory=self.cik_directory) for url in self.filing_urls]
 
     def run(self):
-        self.metadata = self.get_metadata()
+        self.metadata = json.loads(s=self.run_request(url=self.url, headers=self.headers))
         self.filing_urls = self.get_filing_urls()
         self.filings = self.get_filings()
 

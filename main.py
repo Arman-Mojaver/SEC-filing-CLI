@@ -59,7 +59,7 @@ def main(ciks, form, user):
     all_filings = [filing for entity in entities for filing in entity.filings]
     chunked_filings = list(chunked(all_filings, n=10))
 
-    user_message = f'Running requests from user "{Base.HEADER["User-Agent"]}":'
+    user_message = f'Running requests from user "{Base.HEADERS["User-Agent"]}":'
     if user:
         user_message = f'Running requests from user "{user}":'
 
