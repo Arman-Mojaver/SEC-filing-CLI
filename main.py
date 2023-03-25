@@ -77,6 +77,7 @@ class Entity(Base):
 
         self.metadata = None
         self.filing_urls = None
+        self.filings = None
 
     @staticmethod
     def process_cik(cik):
@@ -138,9 +139,13 @@ class Entity(Base):
             if form == self.TEN_K_KEY
         ]
 
+    def get_filings(self):
+        return [Filing(url=url, cik=self.cik, cik_directory=self.cik_directory) for url in self.filing_urls]
+
     def run(self):
         self.metadata = self.get_metadata()
         self.filing_urls = self.get_filing_urls()
+        self.filings = self.get_filings()
 
 
 class CIKLoader(Base):
