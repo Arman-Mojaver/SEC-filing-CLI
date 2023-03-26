@@ -39,16 +39,16 @@ FORM_TYPES = [
 ]
 
 help_message = """
-The following CLI retrieves the SEC filings of a company given its cik number.
+The following CLI retrieves the SEC filings of a company given its 'cik' number.
 
-The cik number can be found in the following link: 
+The 'cik' number can be found in the following link: 
 https://www.sec.gov/edgar/searchedgar/cik'
 
-You can introduce unlimited cik numbers in the same command and the all the filings will be retrieved and stored.
+You can introduce unlimited 'cik' numbers in the same command and all the filings will be retrieved and stored.
 
 You can also place a file named 'entities.json' in the running directory 
 with 'company names' (any name) as keys and 'cik' numbers as values.
-The CLI will retrieve an store all the cik numbers listed in the file.  
+The CLI will retrieve and store all the 'cik' numbers listed in the file.  
 
 The corresponding filing will be stored in a directory named 'Data' located in the same directory as the CLI.
 
