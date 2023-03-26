@@ -38,13 +38,32 @@ FORM_TYPES = [
     'UPLOAD',
 ]
 
+help_message = """
+The following CLI retrieves the SEC filings of a company given its cik number.
 
-@click.command()
+The cik number can be found in the following link: 
+https://www.sec.gov/edgar/searchedgar/cik'
+
+You can introduce unlimited cik numbers in the same command and the all the filings will be retrieved and stored.
+
+You can also place a file named 'entities.json' in the running directory 
+with 'company names' (any name) as keys and 'cik' numbers as values.
+The CLI will retrieve an store all the cik numbers listed in the file.  
+
+The corresponding filing will be stored in a directory named 'Data' located in the same directory as the CLI.
+
+Use the following (non required) options to indicate: form type, user, workers, chunk size
+"""
+
+
+@click.command(help=help_message)
 @click.argument('ciks', type=str, nargs=-1, required=False)
-@click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
-@click.option('-u', '--user', type=str, default=None)
-@click.option('-w', '--workers', type=int, default=10)
-@click.option('-c', '--chunk_size', type=int, default=10)
+@click.option(
+    '-f', '--form', type=click.Choice(FORM_TYPES), default='10-K', help='SEC form type to be retrieved. Default: "10-K"'
+)
+@click.option('-u', '--user', type=str, default=None, help='User to make the request calls with')
+@click.option('-w', '--workers', type=int, default=10, help='Worker count to run the multiprocess with. Default: 10')
+@click.option('-c', '--chunk_size', type=int, default=10, help='Chunk size of requests made per user. Default: 10')
 def main(ciks: str, form: str, user: str, workers: int, chunk_size: int) -> None:
     if not ciks:
         ciks = CIKLoader().load().values()
