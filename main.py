@@ -66,6 +66,7 @@ def main(ciks: str, form: str, user: str, workers: int, chunk_size: int) -> None
     chunked_filings = list(chunked(all_filings, n=chunk_size))
 
     if user:
+        users = [user for _ in range(1, len(chunked_filings) + 1)]
         user_message = f'Running requests from user "{user}":'
     else:
         users = [f'{i}@'.join(Base.HEADERS["User-Agent"].split('@')) for i in range(1, len(chunked_filings) + 1)]
