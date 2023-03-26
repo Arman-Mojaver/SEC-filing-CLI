@@ -44,12 +44,18 @@ FORM_TYPES = [
 @click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
 @click.option('-u', '--user', type=str, default=None)
 @click.option('-w', '--workers', type=int, default=10)
-def main(ciks: str, form: str, user: str, workers: int) -> None:
+@click.option('-c', '--chunk_size', type=int, default=10)
+def main(ciks: str, form: str, user: str, workers: int, chunk_size: int) -> None:
     if not ciks:
         ciks = CIKLoader().load().values()
 
     if not ciks:
         raise click.ClickException('Introduce a cik number or add a entities.json file to the running directory')
+
+    if chunk_size > 10:
+        click.confirm(
+            f'Can the user you are making the requests with make more than 10 requests per second?', abort=True
+        )
 
     entities = [Entity(cik=cik, form=form, user=user) for cik in ciks]
 
@@ -57,7 +63,7 @@ def main(ciks: str, form: str, user: str, workers: int) -> None:
         entity.run()
 
     all_filings = [filing for entity in entities for filing in entity.filings]
-    chunked_filings = list(chunked(all_filings, n=10))
+    chunked_filings = list(chunked(all_filings, n=chunk_size))
 
     if user:
         user_message = f'Running requests from user "{user}":'
