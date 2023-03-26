@@ -43,7 +43,8 @@ FORM_TYPES = [
 @click.argument('ciks', type=str, nargs=-1, required=False)
 @click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
 @click.option('-u', '--user', type=str, default=None)
-def main(ciks: str, form: str, user: str) -> None:
+@click.option('-w', '--workers', type=int, default=10)
+def main(ciks: str, form: str, user: str, workers: int) -> None:
     if not ciks:
         ciks = CIKLoader().load().values()
 
@@ -70,7 +71,7 @@ def main(ciks: str, form: str, user: str) -> None:
         click.echo(f'\tRunning request batch {index}/{len(chunked_filings)}')
 
         filings = [filing for filing in chunk]
-        processes = Multiprocessor(objects=filings, user=user)
+        processes = Multiprocessor(objects=filings, user=user, workers=workers)
         processes.run()
 
     click.echo('Done!')
