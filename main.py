@@ -1,9 +1,8 @@
-import time
 import click
 
 from more_itertools import chunked
 
-from classes import CIKLoader, Entity, Base
+from classes import CIKLoader, Entity, Base, Multiprocessor
 
 FORM_TYPES = [
     '10-K',
@@ -69,8 +68,10 @@ def main(ciks, form, user):
 
     for index, (chunk, user) in enumerate(zip(chunked_filings, users), 1):
         click.echo(f'\tRunning request batch {index}/{len(chunked_filings)}')
-        for filing in chunk:
-            filing.run(user=user)
+
+        filings = [filing for filing in chunk]
+        processes = Multiprocessor(objects=filings, user=user)
+        processes.run()
 
     click.echo('Done!')
 

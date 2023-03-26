@@ -2,6 +2,8 @@ import os
 import requests
 import json
 
+from concurrent.futures import ThreadPoolExecutor
+
 
 class Base(object):
     HEADERS = {"User-Agent": "user@domain.com"}
@@ -156,3 +158,19 @@ class CIKLoader(Base):
 
         with open(self.CIKS_PATH, 'r') as fp:
             return json.load(fp)
+
+
+class Multiprocessor:
+    def __init__(self, objects, user, workers=10):
+        self.objects = objects
+        self.user = user
+        self.workers = workers
+
+    @staticmethod
+    def mapper(obj, user):
+        return obj.run(user=user)
+
+    def run(self):
+        with ThreadPoolExecutor(max_workers=self.workers) as executor:
+            for obj in self.objects:
+                executor.submit(self.mapper, obj, user=self.user)
