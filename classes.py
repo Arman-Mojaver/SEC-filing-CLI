@@ -37,14 +37,13 @@ class Base(object):
 class Filing(Base):
     __repr_fields__ = ('url',)
 
-    def __init__(self, url, cik, cik_directory, user=None):
+    def __init__(self, url, entity_directory, user=None):
         self.url = url
-        self.cik = cik
-        self.cik_directory = cik_directory
+        self.entity_directory = entity_directory
         self.headers = {"User-Agent": user} if user else self.HEADERS
 
         self.filename = self.get_directory_filename(absolute_path=url)
-        self.filepath = os.path.join(self.cik_directory, self.filename)
+        self.filepath = os.path.join(self.entity_directory, self.filename)
 
         self.data = None
 
@@ -72,14 +71,13 @@ class Entity(Base):
         self.headers = {"User-Agent": user} if user else self.HEADERS
 
         self.url = f'https://data.sec.gov/submissions/CIK{self.cik}.json'
-        self.cik_directory = os.path.join(self.DATA_DIRECTORY, self.cik)
-
         self.create_data_directory()
-        self.create_cik_directory()
 
+        self.entity_directory = None
         self.metadata = None
         self.filing_urls = None
         self.filings = None
+        self.name = None
 
     @staticmethod
     def process_cik(cik):
@@ -103,11 +101,11 @@ class Entity(Base):
 
         os.mkdir(self.DATA_DIRECTORY)
 
-    def create_cik_directory(self):
-        if os.path.isdir(self.cik_directory):
+    def create_entity_directory(self):
+        if os.path.isdir(self.entity_directory):
             return
 
-        os.mkdir(self.cik_directory)
+        os.mkdir(self.entity_directory)
 
     def get_filing_urls(self):
         filings = self.metadata.get('filings').get('recent')
@@ -131,10 +129,15 @@ class Entity(Base):
         ]
 
     def get_filings(self):
-        return [Filing(url=url, cik=self.cik, cik_directory=self.cik_directory) for url in self.filing_urls]
+        return [Filing(url=url, entity_directory=self.entity_directory) for url in self.filing_urls]
 
     def run(self):
         self.metadata = json.loads(s=self.run_request(url=self.url, headers=self.headers))
+
+        self.name = self.metadata['name']
+        self.entity_directory = os.path.join(self.DATA_DIRECTORY, self.name)
+        self.create_entity_directory()
+
         self.filing_urls = self.get_filing_urls()
         self.filings = self.get_filings()
 

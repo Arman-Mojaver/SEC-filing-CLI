@@ -46,7 +46,7 @@ FORM_TYPES = [
 @click.option('-u', '--user', type=str, default=None)
 def main(ciks, form, user):
     if not ciks:
-        ciks = CIKLoader().load()
+        ciks = CIKLoader().load().values()
 
     if not ciks:
         raise click.ClickException('Introduce a cik number or add a ciks.json file to the running directory')
