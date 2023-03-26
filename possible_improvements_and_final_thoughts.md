@@ -22,6 +22,3 @@
 
 
 * The classes have all been put into one file due to the size of the project, but if it were to be expanded, a better project file system should be developed, putting each class in a separate file (with the exception of `Entity` and `Filing`, that could go in the same file).
-
-
-* The current solution does not have many dependencies (only `Python` and `click` module), but a `docker image` should be created to ensure portability and ease of use.
