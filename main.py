@@ -59,17 +59,18 @@ def main(ciks, form, user):
     all_filings = [filing for entity in entities for filing in entity.filings]
     chunked_filings = list(chunked(all_filings, n=10))
 
-    user_message = f'Running requests from user "{Base.HEADERS["User-Agent"]}":'
     if user:
         user_message = f'Running requests from user "{user}":'
+    else:
+        users = [f'{i}@'.join(Base.HEADERS["User-Agent"].split('@')) for i in range(1, len(chunked_filings) + 1)]
+        user_message = f'Running requests from user/s : {", ".join(map(str, users))}'
 
     click.echo(user_message)
 
-    for index, chunk in enumerate(chunked_filings, 1):
+    for index, (chunk, user) in enumerate(zip(chunked_filings, users), 1):
         click.echo(f'\tRunning request batch {index}/{len(chunked_filings)}')
         for filing in chunk:
-            filing.run()
-        time.sleep(1)
+            filing.run(user=user)
 
     click.echo('Done!')
 

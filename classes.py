@@ -57,8 +57,12 @@ class Filing(Base):
         with open(self.filepath, 'w+') as file:
             file.write(self.data)
 
-    def run(self):
-        self.data = self.run_request(url=self.url, headers=self.headers)
+    def run(self, user):
+        headers = self.headers
+        if user:
+            headers = {"User-Agent": user}
+
+        self.data = self.run_request(url=self.url, headers=headers)
         self.dump()
 
 
