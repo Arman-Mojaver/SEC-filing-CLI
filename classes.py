@@ -2,6 +2,8 @@ import os
 import requests
 import json
 
+from typing import Union, List, Any, Optional
+
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -16,7 +18,7 @@ class Base(object):
     CIKS_PATH = os.path.join(CWD, CIKS_FILE_NAME)
 
     @staticmethod
-    def run_request(url, headers):
+    def run_request(url: str, headers: dict) -> str:
         response = requests.get(url, headers=headers)
 
         if response.status_code == 404:
@@ -39,7 +41,7 @@ class Base(object):
 class Filing(Base):
     __repr_fields__ = ('url',)
 
-    def __init__(self, url, entity_directory, user=None):
+    def __init__(self, url: str, entity_directory: str, user: str = None) -> None:
         self.url = url
         self.entity_directory = entity_directory
         self.headers = {"User-Agent": user} if user else self.HEADERS
@@ -50,16 +52,16 @@ class Filing(Base):
         self.data = None
 
     @staticmethod
-    def get_directory_filename(absolute_path):
+    def get_directory_filename(absolute_path: str) -> str:
         file_name = os.path.basename(absolute_path)
         directory_name = os.path.basename(os.path.dirname(absolute_path))
         return f'{directory_name}-{file_name}'
 
-    def dump(self):
+    def dump(self) -> None:
         with open(self.filepath, 'w+') as file:
             file.write(self.data)
 
-    def run(self, user):
+    def run(self, user: str) -> None:
         headers = self.headers
         if user:
             headers = {"User-Agent": user}
@@ -69,9 +71,9 @@ class Filing(Base):
 
 
 class Entity(Base):
-    __repr_fields__ = ('url', 'cik',)
+    __repr_fields__ = ('cik', 'form', 'user',)
 
-    def __init__(self, cik, form, user=None):
+    def __init__(self, cik: Union[str, int], form: str, user: str = None) -> None:
         self.cik = self.process_cik(cik=cik)
         self.form = form
         self.headers = {"User-Agent": user} if user else self.HEADERS
@@ -86,7 +88,7 @@ class Entity(Base):
         self.name = None
 
     @staticmethod
-    def process_cik(cik):
+    def process_cik(cik: Union[str, int]) -> str:
         if not isinstance(cik, (str, int)):
             raise TypeError(f'Invalid cik. Valid types are <str, int>. Introduced type: {type(cik)}')
 
@@ -101,19 +103,19 @@ class Entity(Base):
             zeros = ''.join(['0' for _ in range(10 - len(cik))])
             return zeros + cik
 
-    def create_data_directory(self):
+    def create_data_directory(self) -> None:
         if os.path.isdir(self.DATA_DIRECTORY):
             return
 
         os.mkdir(self.DATA_DIRECTORY)
 
-    def create_entity_directory(self):
+    def create_entity_directory(self) -> None:
         if os.path.isdir(self.entity_directory):
             return
 
         os.mkdir(self.entity_directory)
 
-    def get_filing_urls(self):
+    def get_filing_urls(self) -> List[str]:
         filings = self.metadata.get('filings').get('recent')
 
         if not filings:
@@ -134,10 +136,10 @@ class Entity(Base):
             if form == self.form
         ]
 
-    def get_filings(self):
+    def get_filings(self) -> List['Filing']:
         return [Filing(url=url, entity_directory=self.entity_directory) for url in self.filing_urls]
 
-    def run(self):
+    def run(self) -> None:
         self.metadata = json.loads(s=self.run_request(url=self.url, headers=self.headers))
 
         self.name = self.metadata['name']
@@ -149,28 +151,28 @@ class Entity(Base):
 
 
 class CIKLoader(Base):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def load(self):
+    def load(self) -> Optional[dict]:
         if not os.path.isfile(self.CIKS_PATH):
-            return
+            return None
 
         with open(self.CIKS_PATH, 'r') as fp:
             return json.load(fp)
 
 
 class Multiprocessor:
-    def __init__(self, objects, user, workers=10):
+    def __init__(self, objects: List[Any], user: str, workers: int = 10) -> None:
         self.objects = objects
         self.user = user
         self.workers = workers
 
     @staticmethod
-    def mapper(obj, user):
+    def mapper(obj: Any, user: str) -> None:
         return obj.run(user=user)
 
-    def run(self):
+    def run(self) -> None:
         with ThreadPoolExecutor(max_workers=self.workers) as executor:
             for obj in self.objects:
                 executor.submit(self.mapper, obj, user=self.user)

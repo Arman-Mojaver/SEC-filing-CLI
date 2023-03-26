@@ -43,7 +43,7 @@ FORM_TYPES = [
 @click.argument('ciks', type=str, nargs=-1, required=False)
 @click.option('-f', '--form', type=click.Choice(FORM_TYPES), default='10-K')
 @click.option('-u', '--user', type=str, default=None)
-def main(ciks, form, user):
+def main(ciks: str, form: str, user: str) -> None:
     if not ciks:
         ciks = CIKLoader().load().values()
 
