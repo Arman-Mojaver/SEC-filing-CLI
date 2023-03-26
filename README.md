@@ -7,12 +7,30 @@ https://www.sec.gov/edgar/searchedgar/cik
 
 # Instructions to clone the repository and run the CLI
 
+Open a terminal and execute the following commands
+
 1. Clone the repository:
-   * `git glone https://github.com/Arman-Mojaver/Quartr.git`
-2. Install dependencies:
-   * `pip install click`
-3. Execute the following command:
+   * `git clone https://github.com/Arman-Mojaver/SEC-filing-CLI.git`
+
+
+2. Go to the directory where the repository was cloned:
+   * `cd SEC-filing-CLI`
+
+
+3. Build the image:
+   * `docker build . -t sec-filing-app`
+
+
+4. Run the container:
+   * `docker container run -it --rm sec-filing-app /bin/bash`
+
+
+5. Execute the help function of the CLI:
    * `python main.py --help`
+
+
+6. Execute the CLI:
+   * `python main.py <args> <options>`
 
 # Extra information
 

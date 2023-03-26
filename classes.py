@@ -13,7 +13,7 @@ class Base(object):
     DATA_DIRECTORY_NAME = 'Data'
     CIKS_FILE_NAME = 'entities.json'
 
-    CWD = os.getcwd()
+    CWD = os.path.dirname(__file__)
     DATA_DIRECTORY = os.path.join(CWD, DATA_DIRECTORY_NAME)
     CIKS_PATH = os.path.join(CWD, CIKS_FILE_NAME)
 
