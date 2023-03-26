@@ -5,6 +5,18 @@ The following CLI retrieves the SEC filings of a company given its `cik` (Centra
 The `cik` number can be found in the following link: 
 https://www.sec.gov/edgar/searchedgar/cik
 
+
+# General information
+
+You can introduce unlimited `cik` numbers in the same command and all the filings will be retrieved and stored.
+
+You can also place a file named `entities.json` in the running directory 
+with `company names` (any name) as keys and `cik` numbers as values.
+The CLI will retrieve and store all the `cik` numbers listed in the file.  
+
+The corresponding filing will be stored in a directory named `Data` located in the same directory as the CLI.
+
+
 # Instructions to clone the repository and run the CLI
 
 Open a terminal and execute the following commands
@@ -32,16 +44,6 @@ Open a terminal and execute the following commands
 6. Execute the CLI:
    * `python main.py <args> <options>`
 
-# Extra information
-
-You can introduce unlimited `cik` numbers in the same command and all the filings will be retrieved and stored.
-
-You can also place a file named `entities.json` in the running directory 
-with `company names` (any name) as keys and `cik` numbers as values.
-The CLI will retrieve and store all the `cik` numbers listed in the file.  
-
-The corresponding filing will be stored in a directory named `Data` located in the same directory as the CLI.
-
 
 # CLI Arguments and Options
 
@@ -62,6 +64,25 @@ There are several arguments and options that can be passed to the command to mod
 
 
 * `--chunk_size` (type: `int`, default: `10`): Chunk size of requests made per user.
+
+
+# Extract data from the container after running the CLI
+Once the CLI has been executed, the data is contained in the directory `/app/Data/` (inside the container). You can extract the data from the container to you local environment by doing the following:
+
+1. Get the ID of your container:
+   * `docker ps` or directly from the terminal on an interactive session with the container `root@<ID>:/app#`
+2. Copy the data to a local path:
+   * `docker cp <ID>:/app/Data/ <local path>` 
+
+
+# Edit entities.json
+Although you can open an interactive session, install an editor and edit the file directly from the container, it is better that the file is edited before building the docker image. By doing this the image is being built with the relevant companies, and every time the container is run, the relevant companies are already listed in the `entities.json` file of the container. 
+
+In order to edit `entities.json` and have it by default in the container, do the following:
+1. Steps 1-2 of `Instructions to clone the repository and run the CLI`
+2. Edit `entities.json`
+3. Steps 3-6 of `Instructions to clone the repository and run the CLI`
+
 
 # Limitations
 The CLI has the following limitations:
