@@ -7,7 +7,7 @@ class Base(object):
     HEADERS = {"User-Agent": "user@domain.com"}
 
     DATA_DIRECTORY_NAME = 'Data'
-    CIKS_FILE_NAME = 'ciks.json'
+    CIKS_FILE_NAME = 'entities.json'
 
     CWD = os.getcwd()
     DATA_DIRECTORY = os.path.join(CWD, DATA_DIRECTORY_NAME)

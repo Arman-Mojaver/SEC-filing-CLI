@@ -49,7 +49,7 @@ def main(ciks, form, user):
         ciks = CIKLoader().load().values()
 
     if not ciks:
-        raise click.ClickException('Introduce a cik number or add a ciks.json file to the running directory')
+        raise click.ClickException('Introduce a cik number or add a entities.json file to the running directory')
 
     entities = [Entity(cik=cik, form=form, user=user) for cik in ciks]
 
